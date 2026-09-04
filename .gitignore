@@ -14,14 +14,6 @@ venv/
 env/
 ENV/
 
-# ML model artifacts (large binary files)
-models/*.pkl
-
-# Large data files
-data/*.csv
-
-# Jupyter checkpoints
-.ipynb_checkpoints/
 
 # IDE
 .vscode/settings.json
