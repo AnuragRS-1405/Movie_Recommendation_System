@@ -1,0 +1,32 @@
+# Environment secrets — NEVER commit
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# ML model artifacts (large binary files)
+models/*.pkl
+
+# Large data files
+data/*.csv
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

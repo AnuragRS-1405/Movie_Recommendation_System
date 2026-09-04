@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CineMatch — AI-Powered Movie Recommendations</title>
+    <meta
+      name="description"
+      content="Discover movies with CineMatch — hybrid recommendation platform combining a 45,000-movie TF-IDF dataset with live TMDB discovery, trailers, and personal watchlists."
+    />
+    <meta name="theme-color" content="#07070b" />
+
+    <!-- Google Fonts: Outfit (Display/Headings) + Inter (Body/UI) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+
+    <!-- Ambient background glow mesh -->
+    <div class="bg-glow bg-glow--1" aria-hidden="true"></div>
+    <div class="bg-glow bg-glow--2" aria-hidden="true"></div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         HEADER (Shared across Home & Movie Detail views)
+         ═══════════════════════════════════════════════════════════════ -->
+    <header class="header" role="banner">
+      <div class="header__inner">
+
+        <!-- Brand Logo & Name -->
+        <a class="brand" href="/" id="brand-home-link" aria-label="CineMatch home">
+          <div class="brand__icon-wrap">
+            <svg class="brand__mark" viewBox="0 0 32 32" width="26" height="26" aria-hidden="true">
+              <rect x="2" y="6" width="28" height="20" rx="4" fill="none" stroke="currentColor" stroke-width="2" />
+              <circle cx="8" cy="6" r="1.8" fill="currentColor" />
+              <circle cx="8" cy="26" r="1.8" fill="currentColor" />
+              <circle cx="16" cy="6" r="1.8" fill="currentColor" />
+              <circle cx="16" cy="26" r="1.8" fill="currentColor" />
+              <circle cx="24" cy="6" r="1.8" fill="currentColor" />
+              <circle cx="24" cy="26" r="1.8" fill="currentColor" />
+              <path d="M13 12l8 4-8 4z" fill="currentColor" />
+            </svg>
+          </div>
+          <div class="brand__text">
+            <span class="brand__name">Cine<span class="brand__name--accent">Match</span></span>
+            <span class="brand__tagline">AI Recommendation Engine</span>
+          </div>
+        </a>
+
+        <!-- Interactive Search Box with Autocomplete & Keyboard Hint -->
+        <form class="search" id="search-form" role="search" autocomplete="off">
+          <label class="sr-only" for="search-input">Search for a movie</label>
+          <svg class="search__icon" viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+            <circle cx="9" cy="9" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8" />
+            <line x1="14" y1="14" x2="18.5" y2="18.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+          <input
+            id="search-input"
+            class="search__input"
+            type="text"
+            placeholder='Search 45,000+ movies, e.g. "Inception", "KGF", "Parasite"…'
+            aria-expanded="false"
+            aria-controls="suggestions"
+            aria-autocomplete="list"
+          />
+          <kbd class="search__kbd" title="Press / to focus search">/</kbd>
+          <button type="submit" class="search__submit" id="search-submit-btn" aria-label="Submit search">
+            <span>Search</span>
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M6 3l5 5-5 5" />
+            </svg>
+          </button>
+          <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
+        </form>
+
+        <!-- Right Header Actions -->
+        <div class="header-actions">
+
+          <!-- Backend Health Status Indicator -->
+          <div class="api-status" id="api-status" title="FastAPI backend status">
+            <span class="api-status__dot" id="api-status-dot"></span>
+            <span class="api-status__label" id="api-status-label">connecting…</span>
+          </div>
+
+          <!-- Watchlist Quick Access Button -->
+          <button class="nav-watchlist-btn" id="header-watchlist-btn" type="button" title="View Saved Watchlist">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
+            <span class="nav-watchlist-count" id="header-watchlist-count">0</span>
+          </button>
+
+          <!-- Settings Trigger Button -->
+          <button
+            class="icon-btn"
+            id="settings-btn"
+            type="button"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="settings-pop"
+            title="Backend Settings & API Configuration"
+          >
+            <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M10 6.6a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8Zm7.1 3.4c0 .43-.04.85-.11 1.25l2 1.55-1.94 3.36-2.36-.95c-.68.54-1.45.96-2.29 1.22L12 18.5H8l-.4-2.57a7.4 7.4 0 0 1-2.29-1.22l-2.36.95L1.01 12.3l2-1.55A7.6 7.6 0 0 1 2.9 10c0-.43.04-.85.11-1.25l-2-1.55L2.95 3.84l2.36.95c.68-.54 1.45-.96 2.29-1.22L8 1h4l.4 2.57c.84.26 1.61.68 2.29 1.22l2.36-.95 1.94 3.36-2 1.55c.07.4.11.82.11 1.25Z"
+              />
+            </svg>
+          </button>
+
+          <!-- Settings Popover -->
+          <div class="settings-pop" id="settings-pop" role="dialog" aria-label="Backend settings">
+            <div class="settings-pop__header">
+              <span class="settings-pop__title">FastAPI Backend URL</span>
+            </div>
+            <input id="api-base-input" type="text" spellcheck="false" placeholder="http://127.0.0.1:8000" />
+            <div class="settings-pop__row">
+              <button type="button" id="api-base-save" class="btn btn--primary btn--sm">Save URL</button>
+              <button type="button" id="api-base-test" class="btn btn--secondary btn--sm">Test Connection</button>
+            </div>
+            <p class="settings-pop__hint" id="settings-hint">Points UI to your local FastAPI server.</p>
+          </div>
+
+          <!-- Light / Dark Theme Toggle Button -->
+          <button
+            class="icon-btn"
+            id="theme-toggle"
+            type="button"
+            aria-label="Toggle light or dark theme"
+            aria-pressed="false"
+            title="Toggle theme"
+          >
+            <svg class="icon-sun" viewBox="0 0 20 20" width="17" height="17" aria-hidden="true">
+              <circle cx="10" cy="10" r="4" fill="currentColor" />
+              <g stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+                <line x1="10" y1="1.2" x2="10" y2="3.4" />
+                <line x1="10" y1="16.6" x2="10" y2="18.8" />
+                <line x1="1.2" y1="10" x2="3.4" y2="10" />
+                <line x1="16.6" y1="10" x2="18.8" y2="10" />
+                <line x1="3.9" y1="3.9" x2="5.4" y2="5.4" />
+                <line x1="14.6" y1="14.6" x2="16.1" y2="16.1" />
+                <line x1="14.6" y1="5.4" x2="16.1" y2="3.9" />
+                <line x1="3.9" y1="16.1" x2="5.4" y2="14.6" />
+              </g>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 20 20" width="17" height="17" aria-hidden="true">
+              <path fill="currentColor" d="M16.8 12.4A7 7 0 0 1 7.6 3.2a7.4 7.4 0 1 0 9.2 9.2Z" />
+            </svg>
+          </button>
+
+        </div>
+      </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         NOTIFICATION BANNER (API Notice, Offline alert)
+         ═══════════════════════════════════════════════════════════════ -->
+    <div class="banner" id="banner" role="alert" hidden></div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         HOME VIEW (Discovery, Categories, Regional Shelves)
+         ═══════════════════════════════════════════════════════════════ -->
+    <div class="view view--home" id="view-home">
+
+      <!-- Category Filter Pills -->
+      <nav class="nav-categories-bar" aria-label="Movie categories">
+        <div class="nav-categories" id="categories">
+          <button class="pill is-active" data-category="popular" type="button">
+            <span class="pill__icon">🔥</span>
+            <span>Popular</span>
+          </button>
+          <button class="pill" data-category="top_rated" type="button">
+            <span class="pill__icon">★</span>
+            <span>Top Rated</span>
+          </button>
+          <button class="pill" data-category="now_playing" type="button">
+            <span class="pill__icon">🎬</span>
+            <span>Now Playing</span>
+          </button>
+          <button class="pill" data-category="upcoming" type="button">
+            <span class="pill__icon">✨</span>
+            <span>Upcoming</span>
+          </button>
+          <button class="pill" data-category="trending" type="button">
+            <span class="pill__icon">📈</span>
+            <span>Trending Today</span>
+          </button>
+          <button class="pill pill--watchlist" data-category="watchlist" type="button">
+            <span class="pill__icon">❤️</span>
+            <span>My Watchlist</span>
+            <span class="pill__badge" id="pill-watchlist-count">0</span>
+          </button>
+        </div>
+      </nav>
+
+      <main class="main-content">
+        <!-- Feed Title Header -->
+        <section class="feed-head">
+          <div class="feed-head__left">
+            <h1 class="feed-title" id="feed-title">Popular right now</h1>
+            <p class="feed-sub" id="feed-sub">Select any movie poster to unlock AI content recommendations.</p>
+          </div>
+        </section>
+
+        <!-- Movie Feed Grid -->
+        <section class="feed" id="feed" aria-live="polite" aria-busy="false"></section>
+        <div class="empty-state" id="feed-empty" hidden>
+          <div class="empty-state__icon">🎬</div>
+          <p class="empty-state__title">No movies found</p>
+          <p class="empty-state__sub">Try searching for a specific movie or explore another category.</p>
+        </div>
+
+        <!-- 🇮🇳 Indian Cinema Shelf -->
+        <section class="discovery-section" id="indian-section">
+          <div class="section-head">
+            <div class="section-head__title-group">
+              <h2 class="section-title">🇮🇳 Indian Cinema</h2>
+              <p class="section-subtitle">Bollywood, Tollywood, Kollywood, Mollywood &amp; Sandalwood</p>
+            </div>
+            <span class="section-tag section-tag--india">Regional Gems</span>
+          </div>
+
+          <nav class="nav-categories nav-categories--sub" id="indian-lang-nav" aria-label="Filter by Indian language"></nav>
+
+          <!-- Horizontal Carousel with Arrow Navigation -->
+          <div class="carousel-container">
+            <button class="carousel-nav-btn carousel-nav-btn--prev" id="indian-feed-prev" aria-label="Scroll left" type="button">‹</button>
+            <div class="carousel-track feed--carousel" id="indian-feed"></div>
+            <button class="carousel-nav-btn carousel-nav-btn--next" id="indian-feed-next" aria-label="Scroll right" type="button">›</button>
+          </div>
+        </section>
+
+        <!-- 🌍 World Cinema Shelf -->
+        <section class="discovery-section" id="world-section">
+          <div class="section-head">
+            <div class="section-head__title-group">
+              <h2 class="section-title">🌍 World Cinema</h2>
+              <p class="section-subtitle">Korean, Japanese, French, Spanish, Italian &amp; beyond</p>
+            </div>
+            <span class="section-tag section-tag--world">International</span>
+          </div>
+
+          <nav class="nav-categories nav-categories--sub" id="world-lang-nav" aria-label="Filter by world cinema language"></nav>
+
+          <!-- Horizontal Carousel with Arrow Navigation -->
+          <div class="carousel-container">
+            <button class="carousel-nav-btn carousel-nav-btn--prev" id="world-feed-prev" aria-label="Scroll left" type="button">‹</button>
+            <div class="carousel-track feed--carousel" id="world-feed"></div>
+            <button class="carousel-nav-btn carousel-nav-btn--next" id="world-feed-next" aria-label="Scroll right" type="button">›</button>
+          </div>
+        </section>
+      </main>
+
+    </div><!-- /#view-home -->
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         DETAIL VIEW (Integrated SPA view with ambient hero)
+         ═══════════════════════════════════════════════════════════════ -->
+    <div class="view view--detail is-hidden" id="view-detail">
+      <div id="detail-view-content">
+        <!-- Rendered dynamically by script.js renderDetailView() -->
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         TOAST NOTIFICATION
+         ═══════════════════════════════════════════════════════════════ -->
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         TEMPLATES
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- Movie Poster Card Template -->
+    <template id="tpl-poster-card">
+      <article class="card" tabindex="0" role="button">
+        <!-- Sheen hover light effect -->
+        <div class="card__sheen" aria-hidden="true"></div>
+
+        <!-- Poster Box -->
+        <div class="card__poster">
+          <img class="card__img" alt="" />
+          <div class="card__placeholder">
+            <span class="card__initial"></span>
+          </div>
+          <!-- Rating badge -->
+          <span class="card__rating"></span>
+          <!-- Watchlist bookmark button -->
+          <button class="card__bookmark" type="button" aria-label="Save to watchlist" title="Save to watchlist">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Card Meta Info Below Poster -->
+        <div class="card__info">
+          <h3 class="card__title"></h3>
+          <div class="card__meta-line">
+            <span class="card__year"></span>
+            <span class="card__lang-tag" hidden></span>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <!-- Skeleton Loading Card Template -->
+    <template id="tpl-card-skeleton">
+      <div class="card card--skeleton">
+        <div class="card__poster skeleton-block"></div>
+        <div class="card__info">
+          <div class="skeleton-line" style="width: 82%"></div>
+          <div class="skeleton-line" style="width: 44%"></div>
+        </div>
+      </div>
+    </template>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         APPLICATION SCRIPT
+         ═══════════════════════════════════════════════════════════════ -->
+    <script src="script.js"></script>
+  </body>
+</html>
