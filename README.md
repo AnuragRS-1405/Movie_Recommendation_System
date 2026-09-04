@@ -34,8 +34,6 @@
 - [📂 Repository Structure](#-repository-structure)
 - [🏁 Project Conclusion](#-project-conclusion)
 - [💡 Skills Demonstrated](#-skills-demonstrated)
-- [🗺️ Future Roadmap](#-future-roadmap)
-- [🚀 Quickstart & Setup Guide](#-quickstart--setup-guide)
 
 ---
 
@@ -322,16 +320,3 @@ The **CineMatch Hybrid Recommender** successfully bridges the gap between theore
 - **System Reliability:** Entity resolution, defensive programming against network timeouts, error handling, and graceful degraded modes.
 - **Frontend Development:** Modern Vanilla JavaScript (ES6+), DOM manipulation, asynchronous Promise pipelines, accessible semantic HTML5, fluid CSS glassmorphism.
 - **DevOps & Tooling:** Version control with Git/GitHub, virtual environment management, Jupyter/Colab prototyping, production deployment on Render.
-
----
-
-## 🚀 Quickstart & Setup Guide
-
-### 1. Clone the Repository
-### 2. Set Up Virtual Environment
-### 3. Install Dependencies
-### 4. Configure Environment Credentials
-### 5. Launch the FastAPI Server
-### 6. View the Application
-- **Interactive UI (Frontend):**
-- **Interactive API Documentation:** 
