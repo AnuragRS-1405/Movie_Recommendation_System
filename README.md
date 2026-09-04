@@ -196,17 +196,6 @@ $$\text{Cosine Similarity}(\mathbf{u}, \mathbf{v}) = \frac{\mathbf{u} \cdot \mat
 
 ### 3. Four Recommender Scenarios in `backend/recommender.py`
 
-```python
-# Scenario 1: Local Title -> Local Corpus (Direct Row Index Dot Product)
-query_vec = _tfidf_matrix[int(idx)]
-scores = (_tfidf_matrix @ query_vec.T).toarray().ravel()
-order = np.argsort(-scores)
-
-# Scenario 3: External Title -> Local Corpus (On-the-fly Vector Transformation)
-query_vec = _tfidf_obj.transform([query_feature_str])
-scores = (_tfidf_matrix @ query_vec.T).toarray().ravel()
-```
-
 ### 4. Zero-Retrain In-Memory Startup
 At server startup, `recommender.load_models()` loads all pickle files **exactly once** into system memory:
 - **Zero dynamic retraining** — no cold lag during user interaction.
@@ -336,44 +325,13 @@ The **CineMatch Hybrid Recommender** successfully bridges the gap between theore
 
 ---
 
-## 🗺️ Future Roadmap
-
-- 🤖 **Collaborative Filtering & Matrix Factorization**: Integrate Singular Value Decomposition (SVD) and ALS to blend user-item behavioral interaction data with content-based signals.
-- 🔐 **User Authentication & Cloud Sync**: Implement secure JWT authentication and cloud database persistence (PostgreSQL / Supabase) to sync personal watchlists across devices.
-- 💬 **Transformer-Based Review Sentiment**: Incorporate lightweight Hugging Face Transformer models (BERT / DistilBERT) to analyze audience review polarity and display mood scores.
-- 🕸️ **Knowledge Graph Exploration**: Model cinematic connections using Graph Neural Networks (GNNs) linking directors, cinematographers, and actor networks.
-
----
-
 ## 🚀 Quickstart & Setup Guide
 
 ### 1. Clone the Repository
-```bash
-git clone https://github.com/your-username/movie-recommendation-system.git
-cd "MOVIE RECOMMENDATION SYSTEM"
-```
-
 ### 2. Set Up Virtual Environment
-```bash
-python -m venv .venv
-# On Windows:
-.venv\Scripts\activate
-# On macOS/Linux:
-source .venv/bin/activate
-```
-
 ### 3. Install Dependencies
-```bash
-pip install -r requirements.txt
-```
-
 ### 4. Configure Environment Credentials
-- Create a `.env` file in the root directory.
-- Add your personal metadata API credentials and preferred network settings.
-- Ensure your configuration file is listed in `.gitignore` and never committed to public repositories.
-
 ### 5. Launch the FastAPI Server
-
 ### 6. View the Application
 - **Interactive UI (Frontend):**
 - **Interactive API Documentation:** 
