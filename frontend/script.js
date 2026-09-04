@@ -12,7 +12,7 @@
    ================================================================ */
 
 // ── Application Configuration & State ─────────────────────────────
-const DEFAULT_API = "http://127.0.0.1:8000";
+const DEFAULT_API = "https://movie-recommendation-system-2ajd.onrender.com";
 
 const STORAGE_KEYS = {
   theme: "cinematch_theme",
