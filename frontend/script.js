@@ -1018,13 +1018,6 @@ function renderDetailView(data, query) {
             <div class="carousel-track rec-row" id="dv-rec-local"></div>
             <button class="carousel-nav-btn carousel-nav-btn--next" id="dv-rec-local-next" aria-label="Scroll right" type="button">›</button>
           </div>
-          ${
-            localRecs.length === 20
-              ? `<button class="load-more-btn" id="dv-load-more" data-query="${esc(
-                  movie.title || query
-                )}" data-tmdb-id="${movie.tmdb_id || ""}" data-offset="20">Load more from library</button>`
-              : ""
-          }
         </div>
 
         <!-- External ML-Matched Recommendations -->
@@ -1169,43 +1162,6 @@ function renderDetailView(data, query) {
   setupCarouselNav("dv-rec-external", "dv-rec-external-prev", "dv-rec-external-next");
   setupCarouselNav("dv-rec-genre", "dv-rec-genre-prev", "dv-rec-genre-next");
 
-  // Local recommendations "Load more" button
-  $("dv-load-more")?.addEventListener("click", async (event) => {
-    const btn = event.currentTarget;
-    const searchQ = btn.dataset.query;
-    const tmdbId = btn.dataset.tmdbId;
-    const currentOffset = parseInt(btn.dataset.offset, 10);
-
-    btn.disabled = true;
-    btn.textContent = "Loading…";
-
-    try {
-      const url = tmdbId
-        ? `/recommend?tmdb_id=${encodeURIComponent(
-            tmdbId
-          )}&local_top_n=20&local_offset=${currentOffset}&external_top_n=0&genre_limit=0`
-        : `/recommend?query=${encodeURIComponent(
-            searchQ
-          )}&local_top_n=20&local_offset=${currentOffset}&external_top_n=0&genre_limit=0`;
-      const moreData = await apiGet(url);
-      const moreRecs = moreData.recommendations?.local_similarity || [];
-      const row = $("dv-rec-local");
-
-      _cardCounter = 99; // below fold: lazy load
-      moreRecs.forEach((r) => row?.appendChild(buildRecCard(r)));
-
-      if (moreRecs.length === 20) {
-        btn.dataset.offset = currentOffset + 20;
-        btn.disabled = false;
-        btn.textContent = "Load more from library";
-      } else {
-        btn.remove();
-      }
-    } catch {
-      btn.disabled = false;
-      btn.textContent = "Retry";
-    }
-  });
 
   // Always fetch trailers for ANY movie (present in database or TMDB API)
   loadTrailers(movie.title || query, movie.tmdb_id);
